@@ -1,36 +1,63 @@
 import { connect } from "react-redux"
 import { increaseCounter, decreaseCounter } from "../action/actions"
+import { useSelector, useDispatch } from "react-redux"
 
-function App(props) {
+import Home from "../components/Home.jsx"
 
-  const handleIncrease = () => {
-    props.increaseCounter()
-  }
-
-  const handleDecrease = () => {
-    props.decreaseCounter()
-  }
+function App() {
 
   return (
-    <div className="flex-col flex w-full h-full justify-items-center place-items-center mt-5">
-      <div className="m-4 pt-2 pb-2 pl-4 pr-4 rounded font-semibold text-cyan-600 bg-orange-300">Count: {props.count}</div>
-      <button className="pt-2 pb-2 pl-4 pr-4 rounded font-semibold text-cyan-600" onClick={() => handleIncrease()}>Increase Count</button>
-      <button className="pt-2 pb-2 pl-4 pr-4 rounded font-semibold text-cyan-600" onClick={() => handleDecrease()}>Decrease Count</button>
-    </div>
+    <Home/>
   )
+
 }
 
-const mapStateToProps = state => {
-  return {
-    count: state.counter.count,
-  }
-}
+export default App;
 
-const mapDispatchToProps = dispatch => {
-  return {
-    increaseCounter: () => dispatch(increaseCounter()),
-    decreaseCounter: () => dispatch(decreaseCounter()),
-  } 
-}
 
-export default connect(mapStateToProps,mapDispatchToProps)(App)
+
+  // const dispatch = useDispatch()
+
+  // const newCount = useSelector(
+  //   (state) => {
+  //     return state.counterReducer.count
+  //   }
+  // )
+
+  // const handleIncrease = () => {
+  //   dispatch(increaseCounter())
+  // }
+
+  // const handleDecrease = () => {
+  //   dispatch(decreaseCounter())
+  // }
+
+
+// const newCount = useSelector( // nên chia nhỏ biến ra để đúng với các hook ----- (state) => state.counterReducer viết tắt với return 1 biến
+//     (state) => {
+//       return state.counterReducer.count
+//     }
+//   )
+
+//   const handleIncrease = () => {// props.increaseCounter()
+//     dispatch(increaseCounter())
+//   }
+
+//   const handleDecrease = () => {// props.decreaseCounter()
+//     dispatch(decreaseCounter())
+//   }
+
+// const mapStateToProps = state => {
+//   return {
+//     count: state.counterReducer.count,
+//   }
+// }
+
+// const mapDispatchToProps = dispatch => {
+//   return {
+//     increaseCounter: () => dispatch(increaseCounter()),
+//     decreaseCounter: () => dispatch(decreaseCounter()),
+//   } 
+// }
+
+// export default connect(mapStateToProps,mapDispatchToProps)(App)
