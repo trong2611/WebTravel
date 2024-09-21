@@ -1,6 +1,6 @@
-import { connect } from "react-redux"
-import { increaseCounter, decreaseCounter } from "../action/actions"
-import { useSelector, useDispatch } from "react-redux"
+// import { connect } from "react-redux"
+// import { increaseCounter, decreaseCounter } from "../action/actions"
+// import { useSelector, useDispatch } from "react-redux"
 
 import Home from "../components/Home.jsx"
 

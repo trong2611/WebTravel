@@ -1,28 +1,35 @@
 import { Card, Typography } from "@material-tailwind/react";
-import axios from "axios"
 import { useEffect, useState } from "react"
+import { deleteUser, fetchAllUsers } from "../action/actions";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TABLE_HEAD = ["Id", "Username", "Email", "Action"];
  
 const ListUsersComponent = () => {
 
-    const [listUsers, setListUser] = useState();
-    
+    const dispatch = useDispatch()
+    const listUsers = useSelector((state) => state.userReducer.listUsers)
+    const isLoading = useSelector((state) => state.userReducer.isLoading)
+    const isError = useSelector((state) => state.userReducer.isError)
+
     useEffect(() => {
-        async function fetchAllUser() {
-          const res = await axios.get("http://localhost:8080/users/all")
-          const data = res && res.data ? res.data : []
-          setListUser(data)
-        }
-        fetchAllUser()
+      dispatch(fetchAllUsers())
     }, [])
 
-    const handelDeleteUser = (user) => {
-        console.log(user)
+    const handelUpdateUser = (user) => {
+      console.log(user)
     }
-  
+
+    const handelDeleteUser = (id) => {
+      dispatch(deleteUser(id))
+      toast(`Delete user id: ${id} successfully!`)
+    }
+
+    // nếu muốn code tường minh hơn thì nên dùng if elfe rồi return component  
     return (
-        <table className="w-full table-fixed text-left border border-gray-100 rounded">
+        <table className="w-full table-fixed text-left border border-gray-100 rounded overflow-y">
           <thead>
             <tr>
               {TABLE_HEAD.map((item) => (
@@ -33,28 +40,47 @@ const ListUsersComponent = () => {
             </tr>
           </thead>
           <tbody>
-            {listUsers && listUsers.length > 0 && listUsers.map((item, index) => {
-              const isLast = index === listUsers.length - 1;
-              const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
-   
-              return (
-                <tr key={`user-${index}`}>
-                  <td className={classes}>
-                    <Typography variant="md" color="blue-gray" className="font-normal">{item.id}</Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography variant="md" color="blue-gray" className="font-normal">{item.username}</Typography>
-                  </td>
-                  <td className={classes}>
-                    <Typography variant="md" color="blue-gray" className="font-normal">{item.email}</Typography>
-                  </td>
-                  <td className={classes}>
-                    <button className="bg-blue-300 rounded px-5 py-1 font-semibold text-white">Update</button>
-                    <button className="bg-amber-300 rounded px-5 py-1 font-semibold text-white ml-4" onClick={() => handelDeleteUser(item)}>Delete</button>
-                  </td>
-                </tr>
-              )
-            })}
+            {
+              isError === true ? 
+              <tr>
+                <td>Somthing wrongs, please try again...</td>
+              </tr>
+              :
+              <>
+                {isLoading === true ?
+                  <tr>
+                    <td>Loading data...</td>
+                  </tr>
+                  :
+                  <>
+                    {listUsers && listUsers.length > 0 && listUsers.map((item, index) => {
+                    const isLast = index === listUsers.length - 1;
+                    const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-50";
+         
+                    return (
+                      <tr key={`user-${index}`}>
+                        <td className={classes}>
+                          <Typography variant="md" color="blue-gray" className="font-normal">{item.id}</Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography variant="md" color="blue-gray" className="font-normal">{item.username}</Typography>
+                        </td>
+                        <td className={classes}>
+                          <Typography variant="md" color="blue-gray" className="font-normal">{item.email}</Typography>
+                        </td>
+                        <td className={classes}>
+                          <button className="bg-blue-300 rounded px-5 py-1 font-semibold text-white" onClick={() => handelUpdateUser(item) }>Update</button>
+                          <button className="bg-amber-300 rounded px-5 py-1 font-semibold text-white ml-4" onClick={() => handelDeleteUser(item.id)}>Delete</button>
+                        </td>
+                      </tr>
+                    )
+                    })}
+                  </>
+                }
+                
+              </>
+            }
+            
           </tbody>
         </table>
     )
