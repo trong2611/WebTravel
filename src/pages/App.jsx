@@ -1,63 +1,24 @@
-// import { connect } from "react-redux"
-// import { increaseCounter, decreaseCounter } from "../action/actions"
-// import { useSelector, useDispatch } from "react-redux"
-
-import Home from "../components/Home.jsx"
+import React, { useEffect } from 'react'
+import Header from '../components/Header/Header.jsx'
+import Login from './Login.jsx'
+import Register from './Register.jsx'
+import { Navigate, Outlet } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
 function App() {
 
-  return (
-    <Home/>
-  )
+    const user = useSelector(state => state.user.user)
+    return (
+        user && user !== null 
+        ? 
+            <>
+                <Header/>
+                <Outlet/>
+            </>
+        :
+            <Navigate to="/login" />
+    )
 
 }
 
 export default App;
-
-
-
-  // const dispatch = useDispatch()
-
-  // const newCount = useSelector(
-  //   (state) => {
-  //     return state.counterReducer.count
-  //   }
-  // )
-
-  // const handleIncrease = () => {
-  //   dispatch(increaseCounter())
-  // }
-
-  // const handleDecrease = () => {
-  //   dispatch(decreaseCounter())
-  // }
-
-
-// const newCount = useSelector( // nên chia nhỏ biến ra để đúng với các hook ----- (state) => state.counterReducer viết tắt với return 1 biến
-//     (state) => {
-//       return state.counterReducer.count
-//     }
-//   )
-
-//   const handleIncrease = () => {// props.increaseCounter()
-//     dispatch(increaseCounter())
-//   }
-
-//   const handleDecrease = () => {// props.decreaseCounter()
-//     dispatch(decreaseCounter())
-//   }
-
-// const mapStateToProps = state => {
-//   return {
-//     count: state.counterReducer.count,
-//   }
-// }
-
-// const mapDispatchToProps = dispatch => {
-//   return {
-//     increaseCounter: () => dispatch(increaseCounter()),
-//     decreaseCounter: () => dispatch(decreaseCounter()),
-//   } 
-// }
-
-// export default connect(mapStateToProps,mapDispatchToProps)(App)

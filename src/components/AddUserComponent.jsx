@@ -15,7 +15,7 @@ const AddUserComponent = () => {
 
     const handleCreateNewUser = () => {
         dispatch(createNewUser(email, password, username))
-        toast("Add new user successfully!");
+        toast("Add new user successfully!")
         setEmail("")
         setPassword("")
         setUsername("")
