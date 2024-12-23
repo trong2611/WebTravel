@@ -4,7 +4,6 @@ import {
   RiGroupLine, RiHeartLine, RiMoreLine, 
   RiSendPlaneLine, RiShareForwardLine, RiArrowDownLine 
 } from '@remixicon/react'
-import avatar from '../../../public/avatar.jpg'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
@@ -13,7 +12,6 @@ const SellerLivestreamRoom = () => {
     const user = useSelector(state => state.user.user)
     const { id } = useParams()
     const navigate = useNavigate()
-
     const [isProductListVisible, setIsProductListVisible] = useState(false)
     const [message, setMessage] = useState("")
     const [messages, setMessages] = useState([])
@@ -21,7 +19,6 @@ const SellerLivestreamRoom = () => {
     const messagesEndRef = useRef(null)
     const [product,setProduct] = useState([])
 
-    // Giao diện với scroll
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages])
@@ -38,7 +35,7 @@ const SellerLivestreamRoom = () => {
             sender: 'Me', 
             avatar: user.avatar 
         }
-        setMessages((pre) => [...messages, ms])
+        setMessages([...message, ms])
         setMessage("")
         socket.emit('send-message',{username: user.username, avatar: user.avatar, roomId: id, message: ms})
     }
@@ -51,7 +48,7 @@ const SellerLivestreamRoom = () => {
                 sender: data.username, 
                 avatar: data.avatar 
             }
-            setMessages((pre) =>[...messages, newMessage])
+            setMessages([...messages, newMessage])
         })
     }, [socket])
 
@@ -83,7 +80,6 @@ const SellerLivestreamRoom = () => {
 
     useEffect(() => {
         const roomId = id
-        const user = socket.id
     
         const joinRoom = async () => {
           try {
@@ -138,13 +134,14 @@ const SellerLivestreamRoom = () => {
         });
     
         joinRoom()
-      }, [socket])
 
+      }, [socket])
     
     //Cancer Phòng
     const cancerRoom = () => {
         socket.emit('cancer-room',parseInt(id), (data) => {
             if(data.success){
+                socket.emit('leave-room',id)
                 navigate(`/`)
             }else{
                 toast(data.message)
@@ -161,10 +158,10 @@ const SellerLivestreamRoom = () => {
                             <div className='flex flex-col'>
                                 <div className='flex gap-4 text-white'>
                                     <p className='font-normal text-sm flex'>
-                                        <RiGroupLine size={'20px'}/> 12
+                                        <RiGroupLine size={'20px'}/> 1
                                     </p>
                                     <p className='font-normal text-sm flex'>
-                                        <RiHeartLine size={'20px'}/> 12
+                                        <RiHeartLine size={'20px'}/> 1
                                     </p>
                                 </div>
                             </div>
@@ -243,12 +240,12 @@ const SellerLivestreamRoom = () => {
                 {!isProductListVisible && (
                     <div className='flex flex-col h-[500px] overflow-y-auto px-4 py-2'>
                         {messages.map(msg => (
-                            <div key={msg.id} className='flex gap-4 py-2'>
+                            <div key={msg.id} className='flex gap-4 py-2'>                        
                                 <img src={msg.avatar} alt={msg.sender} className='w-8 h-8 rounded-full'/>
                                 <div className='flex flex-col'>
                                     <span className='font-semibold'>{msg.sender}</span>
                                     <p className='text-sm'>{msg.text}</p>
-                                </div>
+                                </div>    
                             </div>
                         ))}
                         <div ref={messagesEndRef} />

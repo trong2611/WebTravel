@@ -7,7 +7,8 @@ import {
 import avatar from '../../../public/avatar.jpg'
 import sampleImage from '../../../public/liveroom.jpg'
 import { useNavigate, useParams } from 'react-router-dom'
-import { data } from 'autoprefixer'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 const LivestreamRoom = () => {
     const socket = useSelector(state => state.socket.socket)
@@ -23,6 +24,11 @@ const LivestreamRoom = () => {
     const [products, setProducts] = useState([])
     const [information, setInformation] = useState({})
     const [isBuyProduct, setIsBuyProduct] = useState(false)
+    const [selectedProduct, setSelectedProduct] = useState(null)
+    const [showModal, setShowModal] = useState(false)
+    const [quantity, setQuantity] = useState(1)
+    const [address, setAddress] = useState('')
+    const [phone, setPhone] = useState('')
 
     useEffect(() => {
       messageContainerRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,9 +46,34 @@ const LivestreamRoom = () => {
             sender: 'Me', 
             avatar: user.avatar 
         }
-        setMessages((pre) =>[...messages, ms])
+        setMessages([...messages, ms])
         setNewMessage("")
         socket.emit('send-message',{username: user.username, avatar: user.avatar, roomId: id, message: ms})
+    }
+
+    const handleBuyNow = (product) => {
+        setSelectedProduct(product)
+        setShowModal(true)
+    }
+
+    const handleModalClose = () => {
+        setShowModal(false)
+        setQuantity(1)
+        setAddress('')
+        setPhone('')
+    }
+
+    const handleOrderSubmit = () => {
+        const product = {
+          productId: selectedProduct.id,
+          quantity: quantity,
+          price: selectedProduct.price,
+          buyerId: user.id,
+          livestreamId: id
+        }
+        socket.emit('buy-product', product)
+        toast('Đặt hàng thành công!')
+        handleModalClose()
     }
 
     useEffect(() => {
@@ -53,7 +84,7 @@ const LivestreamRoom = () => {
                 sender: data.username, 
                 avatar: data.avatar 
             }
-            setMessages((pre) =>[...messages, newMessage])
+            setMessages([...messages, newMessage])
         })
 
         socket.on('pined-product', (data) => {
@@ -69,10 +100,8 @@ const LivestreamRoom = () => {
           alert('Người bán đã tắt phát trực tiếp!')
           navigate(`/`)
         })
-        
     }, [socket])
 
-    
     useEffect(() => {
         if (isProductListVisible) {
             setShowChatHistory(false)
@@ -83,6 +112,8 @@ const LivestreamRoom = () => {
 
     const leaveRoom = () => {
       console.log("Rời phòng")
+      socket.emit('leave-room',id)
+      navigate('/')
     }
 
     const remoteVideoRef = useRef(null);
@@ -150,7 +181,7 @@ const LivestreamRoom = () => {
       });
   
     }, []);
-    
+
 
     return (
         <div className='w-3/4 flex border-l border-l-gray-400'>
@@ -166,11 +197,11 @@ const LivestreamRoom = () => {
                                 <div className='flex gap-4 text-gray-500'>
                                     <p className='font-normal text-sm flex'>
                                         <RiGroupLine size={'20px'}/>
-                                        12
+                                        1
                                     </p>
                                     <p className='font-normal text-sm flex'>
                                         <RiHeartLine size={'20px'}/>
-                                        12
+                                        1
                                     </p>
                                 </div>
                             </div>
@@ -192,7 +223,7 @@ const LivestreamRoom = () => {
                           <img src={pinnedProduct.image} alt={pinnedProduct.name} className='w-20 h-24 object-cover mb-2' />
                           <h4 className='font-semibold text-sm'>{pinnedProduct.name}</h4>
                           <p className='text-gray-500 text-sm'>{pinnedProduct.price}</p>
-                          <button className='bg-red-500 text-white text-xs py-1 px-3 rounded-md mt-2'>
+                          <button onClick={() => handleBuyNow(pinnedProduct)} className='bg-red-500 text-white text-xs py-1 px-3 rounded-md mt-2'>
                             Đặt hàng ngay
                           </button>
                         </div>
@@ -215,7 +246,7 @@ const LivestreamRoom = () => {
                 <div className='flex justify-center items-center py-3 shadow-sm border-b border-gray-300'>
                     <h1 className='text-lg font-bold'>Trò chuyện đặt hàng</h1>
                 </div>
-                
+
                 <div className='px-4 py-2 bg-gray-100 border-t border-gray-300'>
                     <h2 className='text-sm font-semibold text-gray-700'>Chủ đề phiên live: {information.title}</h2>
                     <p className='text-sm text-gray-600'> Cùng trò chuyện và đặt hàng ngay nhé!</p>
@@ -237,10 +268,8 @@ const LivestreamRoom = () => {
                                     <img src={product.image} alt={product.name} className='w-full h-32 object-cover mb-2'/>
                                     <h4 className='font-semibold text-sm'>{product.name}</h4>
                                     <p className='text-gray-500 text-sm'>{product.price}</p>
-                                    <button 
-                                      onClick={() => alert(`Xem chi tiết sản phẩm: ${product.name}`)}
-                                      className='text-blue-500 text-xs mt-2'>
-                                        Xem sản phẩm
+                                    <button onClick={() => handleBuyNow(product)} className='bg-red-500 text-white text-xs py-1 px-3 rounded-md mt-2'>
+                                      Đặt hàng ngay
                                     </button>
                                 </div>
                             ))}
@@ -256,13 +285,15 @@ const LivestreamRoom = () => {
                     >
                         {messages.map((message, index) => (
                             <div key={index} className='flex items-center py-2'>
+              
                                 <div className='flex-shrink-0 w-8 h-8 rounded-full overflow-hidden'>
-                                    <img src={avatar} alt="Avatar" className='w-full h-full object-cover'/>
+                                    <img src={message.avatar} alt="Avatar" className='w-full h-full object-cover'/>
                                 </div>
                                 <div className='ml-2'>
                                     <p className='font-semibold'>{message.sender}</p>
                                     <p className='text-sm'>{message.text}</p>
                                 </div>
+                            
                             </div>
                         ))}
                     </div>
@@ -284,6 +315,58 @@ const LivestreamRoom = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-gray-800 bg-opacity-60 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-md w-1/3">
+                    <h2 className="text-xl font-semibold mb-4">Thông tin sản phẩm</h2>
+                    <div>
+                        <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-32 object-cover mb-4" />
+                        <p className="font-semibold">{selectedProduct.name}</p>
+                        <p className="text-gray-500">{selectedProduct.description}</p>
+                        <p className="mt-2">Giá: {selectedProduct.price}</p>
+                        <p className="mt-2">Còn lại: {selectedProduct.stock}</p>
+                        <div className="mt-4">
+                            <label htmlFor="quantity" className="block text-sm font-semibold">Số lượng</label>
+                            <input 
+                                id="quantity"
+                                type="number" 
+                                min="1" 
+                                value={quantity} 
+                                onChange={(e) => setQuantity(e.target.value)} 
+                                className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="mt-4">
+                            <label htmlFor="address" className="block text-sm font-semibold">Địa chỉ</label>
+                            <input 
+                                id="address"
+                                type="text" 
+                                value={address} 
+                                onChange={(e) => setAddress(e.target.value)} 
+                                className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="mt-4">
+                            <label htmlFor="phone" className="block text-sm font-semibold">Số điện thoại</label>
+                            <input 
+                                id="phone"
+                                type="text" 
+                                value={phone} 
+                                onChange={(e) => setPhone(e.target.value)} 
+                                className="w-full p-2 mt-2 border border-gray-300 rounded-md"
+                            />
+                        </div>
+                        <div className="mt-4 flex justify-end gap-4">
+                            <button onClick={handleModalClose} className="bg-gray-300 text-white py-2 px-4 rounded-md">Đóng</button>
+                            <button onClick={handleOrderSubmit} className="bg-red-500 text-white py-2 px-4 rounded-md">Đặt hàng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            )}
         </div>
     );
 };

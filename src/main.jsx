@@ -21,6 +21,8 @@ import { connectSocket, disconnectSocket } from './redux/slices/ioSlice'
 import Room from './components/Room/Room.jsx'
 import SellerLivestreamRoom from './components/Seller/LivestreamRoom.jsx'
 import Product from './components/Product/Product.jsx'
+import Message from './components/Message/Message.jsx'
+import OrderDetail from './components/Product/OrderDetail.jsx'
 
 
 const router = createBrowserRouter([
@@ -41,12 +43,20 @@ const router = createBrowserRouter([
             element: <Room/>
           },
           {
+            path: "/message",
+            element: <Message/>
+          },
+          {
             path: "livestream/:id",
             element: <LivestreamRoom/>
           },
           {
             path: "/product",
             element: <Product/>,
+          },
+          {
+            path: "/order-detail",
+            element: <OrderDetail/>,
           },
         ]
       },

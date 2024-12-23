@@ -138,7 +138,7 @@ const Product = () => {
             <tr key={product.id} className='text-center'>
               <td className='border px-4 py-2'>{index + 1}</td>
               <td className='border px-4 py-2'>{product.name}</td>
-              <td className='border px-4 py-2'>0</td>
+              <td className='border px-4 py-2'>{product.da_ban}</td>
               <td className='border px-4 py-2'>{product.stock}</td>
               <td className='border px-4 py-2'>{product.price} VND</td>
               <td className='border px-4 py-2'>
